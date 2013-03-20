@@ -1,0 +1,28 @@
+{
+  "name": "redis-append-stream",
+  "version": "0.0.0",
+  "description": "ERROR: No README.md file found!",
+  "main": "index.js",
+  "scripts": {
+    "test": "./node_modules/.bin/mocha",
+    "dev": "./node_modules/.bin/mocha -w"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:ando-takahiro/redis-append-stream.git"
+  },
+  "dependencies" :{
+      "underscore": "",
+      "async": ""
+  },
+  "devDependencies" :{
+      "generator-stream": "",
+      "node-dev": "",
+      "redis": "",
+      "mocha": "",
+      "chai": ""
+  },
+  "author": "Takahiro Ando",
+  "license": "BSD",
+  "readmeFilename": "README.md"
+}
