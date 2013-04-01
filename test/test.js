@@ -4,7 +4,6 @@
 
 var expect = require('chai').expect,
     stream = require('stream'),
-    Readable = stream.Readable,
     redis = require('redis'),
     fs = require('fs'),
     path = require('path'),
