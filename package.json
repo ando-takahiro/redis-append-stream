@@ -12,11 +12,11 @@
     "url": "git@github.com:ando-takahiro/redis-append-stream.git"
   },
   "dependencies" :{
+      "event-stream": "",
       "underscore": "",
       "async": ""
   },
   "devDependencies" :{
-      "generator-stream": "",
       "node-dev": "",
       "redis": "",
       "mocha": "",

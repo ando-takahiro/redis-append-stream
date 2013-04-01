@@ -1,8 +1,8 @@
 'use strict';
 
 var stream = require('stream'),
-    Readable = stream.Readable,
     Writable = stream.Writable,
+    es = require('event-stream'),
     util = require('util'),
     DEFAULT_READ_LENGTH = 64 * 1024; // no evidence for this value
 
@@ -13,46 +13,28 @@ exports.createWriteStream = function(options) {
 exports.createReadStream = function(options) {
   // this is from the document of node 0.10
 
-  var stream = new Readable(options),
-      key = new Buffer(options.key),
+  var key = new Buffer(options.key),
       client = options.client,
       maxReadLength = options.maxReadLength || DEFAULT_READ_LENGTH,
-      busy = false,
       current = 0;
 
-  function fetch(n) {
-    if (busy) {
-      return;
-    }
-
-    n = Math.min(n || maxReadLength, maxReadLength);
-    busy = true;
-    client.getrange(key, current, current + n - 1, function(err, data) {
-      busy = false;
+  return es.readable(function(count, callback) {
+    var that = this;
+    client.getrange(key, current, current + maxReadLength - 1, function(err, data) {
       if (err) {
-        stream.emit('error', err);
+        that.emit('error', err);
       } else {
         if (data.length === 0) {
           // finished
-          stream.push(null);
+          that.emit('end');
         } else {
           current += data.length;
-          if (stream.push(data)) {
-            // if push() returns false, then we need to stop reading from source
-            fetch();
-          }
+          that.emit('data', data);
         }
       }
+      callback();
     });
-  }
-
-  // _read will be called when the stream wants to pull more data in
-  // the advisory size argument is ignored in this case.
-  stream._read = function(n) {
-    fetch(n);
-  };
-
-  return stream;
+  });
 };
 
 function Append(options) {

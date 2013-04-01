@@ -10,26 +10,22 @@ var expect = require('chai').expect,
     path = require('path'),
     createWriteStream = require('../index.js').createWriteStream,
     createReadStream = require('../index.js').createReadStream,
-    createGeneratorStream = require('generator-stream').create,
+    es = require('event-stream'),
     KEY = 'redis-append-stream-file';
 
 describe('redis-append-stream-file', function() {
   var client,
-      count = 0,
       size = 64 * 1024,
-      buf = new Buffer(size),
-      generator = createGeneratorStream(function() {
-        return count++ < 10 ? buf : null;
-      });
+      buf = new Buffer(size);
 
   for (var i = 0; i < size; ++i) {
     buf.writeUInt8(i % 256, i);
   }
 
-  beforeEach(function(done) {
+  beforeEach(function() {
     // you need 'detect_buffers' if you treat binay file
     client = redis.createClient(null, null, {detect_buffers: true});
-    client.del(KEY, done);
+    client.del(KEY);
   });
 
   afterEach(function() {
@@ -38,7 +34,16 @@ describe('redis-append-stream-file', function() {
 
   it('send "append" command to redis', function(done) {
     // write with WriteStream
-    var writeStream = createWriteStream({client: client, key: KEY});
+    var generator = es.readable(function(count, callback) {
+          if (count < 10) {
+            this.emit('data', buf);
+          } else {
+            this.emit('end');
+          }
+          callback();
+        }),
+        writeStream = createWriteStream({client: client, key: KEY});
+
     generator.pipe(writeStream);
 
     // wait writing
