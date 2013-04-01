@@ -1,18 +1,15 @@
 'use strict';
 
-var stream = require('stream'),
-    Writable = stream.Writable,
-    es = require('event-stream'),
+var es = require('event-stream'),
     util = require('util'),
     DEFAULT_READ_LENGTH = 64 * 1024; // no evidence for this value
 
 exports.createWriteStream = function(options) {
-  return new Append(options);
+  var client = options.client;
+  return es.through(client.append.bind(client, options.key));
 };
 
 exports.createReadStream = function(options) {
-  // this is from the document of node 0.10
-
   var key = new Buffer(options.key),
       client = options.client,
       maxReadLength = options.maxReadLength || DEFAULT_READ_LENGTH,
@@ -35,18 +32,6 @@ exports.createReadStream = function(options) {
       callback();
     });
   });
-};
-
-function Append(options) {
-  this._client = options.client;
-  this._key = options.key;
-  Writable.call(this, options);
-}
-
-util.inherits(Append, Writable);
-
-Append.prototype._write = function(chunk, encoding, cb) {
-  this._client.append(this._key, chunk, cb);
 };
 
 // vim: ts=2:sw=2:sts=2:expandtab:

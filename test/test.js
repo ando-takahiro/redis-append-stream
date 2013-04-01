@@ -47,7 +47,7 @@ describe('redis-append-stream-file', function() {
     generator.pipe(writeStream);
 
     // wait writing
-    writeStream.on('finish', function() {
+    writeStream.on('end', function() {
       // read with ReadStream
       var cnt = 0,
           readStream = createReadStream({client: client, key: KEY});
